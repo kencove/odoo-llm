@@ -15,9 +15,8 @@ class MailMessage(models.Model):
 
     llm_role = fields.Char(
         string="LLM Role",
-        compute="_compute_llm_role",
-        store=True,
-        # Note: Index is created via migration script to avoid hanging on large databases
+        # Direct field (not computed) to avoid triggering mass computation on install.
+        # Populated by post_init_hook and updated via _on_change_subtype_id.
         help="The LLM role for this message (user, assistant, tool, system)",
     )
 
@@ -27,10 +26,9 @@ class MailMessage(models.Model):
     )
 
     @api.depends("subtype_id")
-    def _compute_llm_role(self):
-        """Compute the LLM role for messages based on their subtype."""
+    def _on_change_subtype_id(self):
+        """Update llm_role when subtype_id changes."""
         id_to_role, _ = self.get_llm_roles()
-
         for message in self:
             if message.subtype_id and message.subtype_id.id in id_to_role:
                 message.llm_role = id_to_role[message.subtype_id.id]

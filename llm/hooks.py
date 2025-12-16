@@ -16,10 +16,10 @@ def _column_exists(cr, table, column):
 
 
 def pre_init_hook(cr):
-    """Run before module install to add llm_role column and index.
+    """Run before module install to add llm_role column.
 
-    This prevents Odoo from preparing computation for a new stored field
-    across the entire mail_message table on first install.
+    Since llm_role is now a direct field (not computed), this just ensures
+    the column exists to prevent ORM creation during field registration.
     """
     table = "mail_message"
     column = "llm_role"
@@ -31,15 +31,29 @@ def pre_init_hook(cr):
             _logger.info("[LLM] Column added: %s.%s", table, column)
         else:
             _logger.info("[LLM] Column already exists: %s.%s", table, column)
-
-        # Create index without CONCURRENTLY (not allowed in transaction block)
-        index_name = f"{table}_{column}_idx"
-        _logger.info("[LLM] Ensuring index %s on %s(%s)", index_name, table, column)
-        cr.execute(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({column})")
-        _logger.info("[LLM] Index ensured: %s", index_name)
     except Exception:
         _logger.exception(
             "[LLM] pre_init_hook failed while preparing %s.%s", table, column
         )
-        # Allow install to continue; column will be created later by ORM if needed
-        # but the exception is logged for visibility.
+        # Allow install to continue; column will be created later by ORM if needed.
+
+
+def post_init_hook(cr, registry):
+    """Run after module install to populate llm_role for existing messages."""
+    from odoo.api import Environment
+
+    _logger.info("[LLM] post_init_hook: populating llm_role for existing messages")
+    try:
+        env = Environment(cr, 2, {})  # uid=2 (usually admin in tests)
+        MailMessage = env["mail.message"]
+        
+        # Get all records with a subtype and populate llm_role
+        messages = MailMessage.search([(("subtype_id", "!=", False))])
+        if messages:
+            _logger.info("[LLM] post_init_hook: updating %d messages with subtypes", len(messages))
+            for message in messages:
+                message._on_change_subtype_id()
+        
+        _logger.info("[LLM] post_init_hook: llm_role population complete")
+    except Exception:
+        _logger.exception("[LLM] post_init_hook failed")
