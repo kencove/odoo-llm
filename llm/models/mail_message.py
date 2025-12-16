@@ -17,7 +17,7 @@ class MailMessage(models.Model):
         string="LLM Role",
         compute="_compute_llm_role",
         store=True,
-        index=True,  # Add index for better query performance
+        # Note: Index is created via migration script to avoid hanging on large databases
         help="The LLM role for this message (user, assistant, tool, system)",
     )
 
