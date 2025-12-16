@@ -29,4 +29,5 @@
     "images": [
         "static/description/banner.jpeg",
     ],
+    "pre_init_hook": "pre_init_hook",
 }
