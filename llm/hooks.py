@@ -32,21 +32,11 @@ def pre_init_hook(cr):
         else:
             _logger.info("[LLM] Column already exists: %s.%s", table, column)
 
-        # Create index concurrently when possible
+        # Create index without CONCURRENTLY (not allowed in transaction block)
         index_name = f"{table}_{column}_idx"
         _logger.info("[LLM] Ensuring index %s on %s(%s)", index_name, table, column)
-        try:
-            cr.execute(
-                f"CREATE INDEX CONCURRENTLY IF NOT EXISTS {index_name} ON {table} ({column})"
-            )
-            _logger.info("[LLM] Index ensured concurrently: %s", index_name)
-        except Exception:
-            # Fallback without concurrently (older PG or transaction context)
-            _logger.warning(
-                "[LLM] Concurrent index creation failed; attempting regular creation"
-            )
-            cr.execute(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({column})")
-            _logger.info("[LLM] Index ensured: %s", index_name)
+        cr.execute(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({column})")
+        _logger.info("[LLM] Index ensured: %s", index_name)
     except Exception:
         _logger.exception(
             "[LLM] pre_init_hook failed while preparing %s.%s", table, column
