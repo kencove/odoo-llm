@@ -16,7 +16,7 @@ class MailMessage(models.Model):
     llm_role = fields.Char(
         string="LLM Role",
         compute="_compute_llm_role",
-        store=True,
+        store=False,
         index=False,
         help="The LLM role for this message (user, assistant, tool, system)",
     )
