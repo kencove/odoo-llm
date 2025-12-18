@@ -12,7 +12,7 @@ class LLMPromptCategory(models.Model):
     name = fields.Char(
         string="Category Name",
         required=True,
-        index=True,
+        index=False,
     )
     complete_name = fields.Char(
         string="Complete Name",
@@ -23,12 +23,12 @@ class LLMPromptCategory(models.Model):
     parent_id = fields.Many2one(
         "llm.prompt.category",
         string="Parent Category",
-        index=True,
+        index=False,
         ondelete="cascade",
     )
     # Disable unaccent for parent_path as it's not needed for ID-based paths.
     parent_path = fields.Char(
-        index=True,
+        index=False,
         unaccent=False,
     )
     child_ids = fields.One2many(

@@ -12,7 +12,7 @@ class DocumentPage(models.Model):
     source_url = fields.Char(
         string="Source URL",
         readonly=True,
-        index=True,
+        index=False,
         copy=False,
         help="The original URL from which this page content was retrieved, if applicable.",
     )

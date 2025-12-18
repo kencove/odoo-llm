@@ -17,7 +17,7 @@ class LLMKnowledgeChunkEmbedding(models.Model):
         string="Chunk",
         required=True,
         ondelete="cascade",
-        index=True,
+        index=False,
     )
     # Related field to get collections from chunk's resource
     collection_ids = fields.Many2many(
@@ -33,7 +33,7 @@ class LLMKnowledgeChunkEmbedding(models.Model):
         domain="[('model_use', '=', 'embedding')]",
         required=True,
         ondelete="restrict",
-        index=True,
+        index=False,
     )
     embedding = PgVector(
         string="Vector Embedding",
@@ -44,7 +44,7 @@ class LLMKnowledgeChunkEmbedding(models.Model):
         related="chunk_id.resource_id",
         store=True,
         readonly=True,
-        index=True,
+        index=False,
     )
 
     _sql_constraints = [
