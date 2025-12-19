@@ -16,13 +16,15 @@ def _column_exists(cr, table, column):
 
 
 def pre_init_hook(cr):
-    """Run before module install to add llm_role column.
+    """Run before module install to add llm_role column and index.
 
-    Since llm_role is now a direct field (not computed), this just ensures
-    the column exists to prevent ORM creation during field registration.
+    Since llm_role is now a direct field (not computed), this ensures
+    the column and index exist before ORM field registration.
+    This prevents expensive operations during module installation on large tables.
     """
     table = "mail_message"
     column = "llm_role"
+    index = "mail_message_llm_role_index"
 
     try:
         if not _column_exists(cr, table, column):
@@ -31,6 +33,25 @@ def pre_init_hook(cr):
             _logger.info("[LLM] Column added: %s.%s", table, column)
         else:
             _logger.info("[LLM] Column already exists: %s.%s", table, column)
+
+        # Add index for performance (CONCURRENTLY to avoid locks)
+        cr.execute(
+            """
+            SELECT 1
+            FROM pg_indexes
+            WHERE tablename = %s AND indexname = %s
+            """,
+            (table, index),
+        )
+        if not cr.fetchone():
+            _logger.info("[LLM] Creating index %s on %s.%s", index, table, column)
+            cr.execute(
+                f"CREATE INDEX CONCURRENTLY IF NOT EXISTS {index} ON {table} ({column})"
+            )
+            _logger.info("[LLM] Index created: %s", index)
+        else:
+            _logger.info("[LLM] Index already exists: %s", index)
+
     except Exception:
         _logger.exception(
             "[LLM] pre_init_hook failed while preparing %s.%s", table, column
@@ -46,14 +67,30 @@ def post_init_hook(cr, registry):
     try:
         env = Environment(cr, 2, {})  # uid=2 (usually admin in tests)
         MailMessage = env["mail.message"]
-        
-        # Get all records with a subtype and populate llm_role
-        messages = MailMessage.search([(("subtype_id", "!=", False))])
-        if messages:
-            _logger.info("[LLM] post_init_hook: updating %d messages with subtypes", len(messages))
-            for message in messages:
-                message._on_change_subtype_id()
-        
+
+        # Get LLM role mappings
+        id_to_role, _ = MailMessage.get_llm_roles()
+
+        if id_to_role:
+            _logger.info(
+                "[LLM] post_init_hook: updating messages with SQL for performance"
+            )
+
+            # Use direct SQL UPDATE for each role to avoid ORM overhead on large tables
+            for subtype_id, role in id_to_role.items():
+                cr.execute(
+                    """
+                    UPDATE mail_message
+                    SET llm_role = %s
+                    WHERE subtype_id = %s AND (llm_role IS NULL OR llm_role != %s)
+                    """,
+                    (role, subtype_id, role),
+                )
+                if cr.rowcount:
+                    _logger.info(
+                        "[LLM] Updated %d messages with role '%s'", cr.rowcount, role
+                    )
+
         _logger.info("[LLM] post_init_hook: llm_role population complete")
     except Exception:
         _logger.exception("[LLM] post_init_hook failed")
