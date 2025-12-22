@@ -16,7 +16,7 @@ class LLMMCPSession(models.Model):
     ]
 
     # Required fields
-    session_id = fields.Char(required=True, index=True, help="UUID hex format")
+    session_id = fields.Char(required=True, index=False, help="UUID hex format")
     state = fields.Selection(
         [
             ("not_initialized", "Not Initialized"),
@@ -29,7 +29,7 @@ class LLMMCPSession(models.Model):
 
     user_id = fields.Many2one(
         "res.users",
-        index=True,
+        index=False,
         help="User associated with session, set when Bearer token is available",
     )
 

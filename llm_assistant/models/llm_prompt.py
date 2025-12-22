@@ -38,7 +38,7 @@ class LLMPrompt(models.Model):
         "llm.prompt.category",
         string="Category",
         tracking=True,
-        index=True,
+        index=False,
         help="Category for organizing prompts",
     )
 

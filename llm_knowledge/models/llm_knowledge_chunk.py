@@ -21,7 +21,7 @@ class LLMKnowledgeChunk(models.Model):
         string="Resource",
         required=True,
         ondelete="cascade",
-        index=True,
+        index=False,
     )
     sequence = fields.Integer(
         string="Sequence",

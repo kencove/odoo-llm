@@ -54,7 +54,7 @@ class LLMAssistant(models.Model):
     code = fields.Char(
         string="Code",
         help="Unique code identifier for the assistant (e.g., roleplay, avatar_generation)",
-        index=True,
+        index=False,
     )
     
     res_model = fields.Char(

@@ -16,14 +16,14 @@ class LLMKnowledgeDomain(models.Model):
         string="Collection",
         required=True,
         ondelete="cascade",
-        index=True,
+        index=False,
     )
     model_id = fields.Many2one(
         "ir.model",
         string="Model",
         required=True,
         ondelete="cascade",
-        index=True,
+        index=False,
     )
     model_name = fields.Char(
         string="Model Name",
