@@ -1,3 +1,12 @@
+16.0.1.4.2 (2025-12-15)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* [FIX] **CRITICAL** Fixed module hanging during upgrade on large databases
+* [IMP] Changed llm_role index creation from ORM to SQL migration script
+* [IMP] Index now created using CONCURRENTLY to avoid blocking operations
+* [IMP] Safe for databases with millions of mail_message records
+* [DOC] Added migration performance notes for large database deployments
+
 16.0.1.4.1 (2025-11-17)
 ~~~~~~~~~~~~~~~~~~~~~~~
 

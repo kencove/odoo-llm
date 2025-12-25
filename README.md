@@ -8,7 +8,7 @@ This repository provides a comprehensive framework for integrating Large Languag
 
 ### **Major Architecture Improvements**
 - **Consolidated Architecture**: Merged `llm_resource` into `llm_knowledge` and `llm_prompt` into `llm_assistant` for streamlined management
-- **Performance Optimization**: Added indexed `llm_role` field for 10x faster message queries and improved database performance  
+- **Performance Optimization**: Added indexed `llm_role` field for 10x faster message queries (v16.0.1.4.2: Fixed hanging on large databases)
 - **Unified Generation API**: New `generate()` method provides consistent content generation across all model types (text, images, etc.)
 - **Enhanced Tool System**: Simplified tool execution with structured `body_json` storage and better error handling
 - **PostgreSQL Advisory Locking**: Prevents concurrent generation issues with proper database-level locks
@@ -98,7 +98,7 @@ Install these modules by cloning the repository and making them available in you
    # Option A: Clone directly into addons directory
    cd /path/to/your/odoo/addons/
    git clone https://github.com/apexive/odoo-llm
-   
+
    # Option B: Copy modules to extra-addons
    cp -r /path/to/odoo-llm/* /path/to/your/odoo/extra-addons/
    ```
@@ -203,7 +203,7 @@ This integration enables revolutionary AI-powered business processes:
 We're committed to building an open AI layer for Odoo that benefits everyone. Areas where we welcome contributions:
 
 - **Testing & CI/CD**: Unit tests for the consolidated architecture
-- **Security Enhancements**: Access control and audit improvements  
+- **Security Enhancements**: Access control and audit improvements
 - **Provider Integrations**: Support for additional AI services
 - **Localization**: Translations and regional customizations
 - **Documentation**: Examples, tutorials, and use case guides

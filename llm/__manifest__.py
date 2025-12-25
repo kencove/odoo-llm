@@ -12,7 +12,7 @@
     "author": "Apexive Solutions LLC",
     "website": "https://github.com/apexive/odoo-llm",
     "category": "Technical",
-    "version": "16.0.1.4.1",
+    "version": "16.0.1.4.2",
     "depends": ["mail", "web"],
     "data": [
         "security/llm_security.xml",
@@ -26,6 +26,8 @@
     ],
     "license": "LGPL-3",
     "installable": True,
+    "pre_init_hook": "pre_init_hook",
+    "post_init_hook": "post_init_hook",
     "images": [
         "static/description/banner.jpeg",
     ],
